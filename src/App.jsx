@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import Journey from './components/Journey';
 import Profile from './components/Profile';
 import Projects from './components/Projects';
 import Contact from './components/Contact';
 
 export default function App() {
   useEffect(() => {
-    // Enable smooth scrolling across the app
     document.documentElement.classList.add('scroll-smooth');
     return () => document.documentElement.classList.remove('scroll-smooth');
   }, []);
@@ -16,6 +16,7 @@ export default function App() {
     <div className="min-h-screen bg-[#0b0f17] font-sans text-white">
       <Navbar />
       <Hero />
+      <Journey />
       <Profile />
       <Projects />
       <Contact />
