@@ -1,21 +1,30 @@
 import React, { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 
 /*
   Journey Parallax Section
   Layers: sky -> far mountains -> pine trees -> city -> skyscrapers -> character evolution
-  Uses Framer Motion parallax tied to the section scroll progress for performant transforms.
+  Scroll-driven parallax + subtle mouse-based horizontal parallax for extra depth.
 */
 export default function Journey() {
   const sectionRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] });
 
-  // Parallax mappings (smaller movement for far elements, larger for close ones)
+  // Vertical parallax mappings (smaller movement for far elements, larger for close ones)
   const ySky = useTransform(scrollYProgress, [0, 1], [0, -60]);
   const yMountains = useTransform(scrollYProgress, [0, 1], [0, -120]);
   const yTrees = useTransform(scrollYProgress, [0, 1], [0, -180]);
   const yCity = useTransform(scrollYProgress, [0, 1], [0, -240]);
   const ySkyscrapers = useTransform(scrollYProgress, [0, 1], [0, -300]);
+
+  // Mouse-based horizontal parallax
+  const mouseX = useMotionValue(0.5); // normalized 0..1
+  const smoothX = useSpring(mouseX, { stiffness: 80, damping: 20, mass: 0.2 });
+  const xSky = useTransform(smoothX, [0, 1], [30, -30]);
+  const xMountains = useTransform(smoothX, [0, 1], [40, -40]);
+  const xTrees = useTransform(smoothX, [0, 1], [60, -60]);
+  const xCity = useTransform(smoothX, [0, 1], [80, -80]);
+  const xSkyscrapers = useTransform(smoothX, [0, 1], [100, -100]);
 
   // Character evolution: crossfade three stages across progress
   const kidOpacity = useTransform(scrollYProgress, [0.00, 0.25, 0.35], [1, 1, 0]);
@@ -23,18 +32,30 @@ export default function Journey() {
   const proOpacity = useTransform(scrollYProgress, [0.60, 0.80, 1.00], [0, 1, 1]);
   const proGlow = useTransform(scrollYProgress, [0.7, 1], [0, 1]);
 
+  // Chapter captions
+  const chap1 = useTransform(scrollYProgress, [0.0, 0.18, 0.28], [1, 1, 0]);
+  const chap2 = useTransform(scrollYProgress, [0.30, 0.45, 0.60], [0, 1, 0]);
+  const chap3 = useTransform(scrollYProgress, [0.65, 0.80, 1.0], [0, 1, 1]);
+
+  const handleMouseMove = (e) => {
+    const rect = sectionRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = (e.clientX - rect.left) / rect.width; // 0..1
+    mouseX.set(Math.max(0, Math.min(1, x)));
+  };
+
   return (
-    <section id="journey" ref={sectionRef} className="relative w-full overflow-hidden bg-[#090d13] text-white">
+    <section id="journey" ref={sectionRef} onMouseMove={handleMouseMove} className="relative w-full overflow-hidden bg-[#090d13] text-white">
       {/* Scene height to allow storytelling scroll */}
-      <div className="relative h-[140vh] w-full">
+      <div className="relative h-[160vh] w-full">
         {/* Sky gradient with soft stars */}
-        <motion.div style={{ y: ySky }} className="absolute inset-0">
+        <motion.div style={{ y: ySky, x: xSky }} className="absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(1200px_600px_at_50%_-10%,rgba(99,102,241,0.18),transparent),radial-gradient(1000px_600px_at_90%_30%,rgba(34,211,238,0.14),transparent),linear-gradient(180deg,rgba(10,14,20,1)_0%,rgba(9,13,19,1)_100%)]" />
           <Starfield />
         </motion.div>
 
         {/* Far mountains (SVG waves) */}
-        <motion.div style={{ y: yMountains }} className="absolute inset-x-0 bottom-0 h-[55%]">
+        <motion.div style={{ y: yMountains, x: xMountains }} className="absolute inset-x-0 bottom-0 h-[55%]">
           <svg className="absolute inset-x-0 bottom-0 h-full w-full" viewBox="0 0 1440 600" preserveAspectRatio="none" aria-hidden>
             <defs>
               <linearGradient id="mountainGrad" x1="0" x2="1" y1="0" y2="1">
@@ -47,7 +68,7 @@ export default function Journey() {
         </motion.div>
 
         {/* Pine trees silhouette */}
-        <motion.div style={{ y: yTrees }} className="absolute inset-x-0 bottom-0 h-[45%]">
+        <motion.div style={{ y: yTrees, x: xTrees }} className="absolute inset-x-0 bottom-0 h-[45%]">
           <svg className="absolute inset-x-0 bottom-0 h-full w-full" viewBox="0 0 1440 600" preserveAspectRatio="none" aria-hidden>
             <defs>
               <linearGradient id="treeGrad" x1="0" x2="0" y1="0" y2="1">
@@ -67,7 +88,7 @@ export default function Journey() {
         </motion.div>
 
         {/* City Skyline */}
-        <motion.div style={{ y: yCity }} className="absolute inset-x-0 bottom-0 h-[40%]">
+        <motion.div style={{ y: yCity, x: xCity }} className="absolute inset-x-0 bottom-0 h-[40%]">
           <svg className="absolute inset-x-0 bottom-0 h-full w-full" viewBox="0 0 1440 600" preserveAspectRatio="none" aria-hidden>
             <defs>
               <linearGradient id="cityGrad" x1="0" x2="0" y1="0" y2="1">
@@ -85,7 +106,7 @@ export default function Journey() {
         </motion.div>
 
         {/* Skyscrapers (foreground) */}
-        <motion.div style={{ y: ySkyscrapers }} className="absolute inset-x-0 bottom-0 h-[35%]">
+        <motion.div style={{ y: ySkyscrapers, x: xSkyscrapers }} className="absolute inset-x-0 bottom-0 h-[35%]">
           <svg className="absolute inset-x-0 bottom-0 h-full w-full" viewBox="0 0 1440 600" preserveAspectRatio="none" aria-hidden>
             <defs>
               <linearGradient id="skyGrad" x1="0" x2="0" y1="0" y2="1">
@@ -111,7 +132,7 @@ export default function Journey() {
             <StageLabel>Curious kid</StageLabel>
           </motion.div>
           {/* College builder with laptop */}
-          <motion.div style={{ opacity: builderOpacity }} className="relative h-28 w-28 items-end justify-center hidden sm:flex">
+          <motion.div style={{ opacity: builderOpacity }} className="relative hidden h-28 w-28 items-end justify-center sm:flex">
             <Person scale={1.0} laptop />
             <StageLabel>College builder</StageLabel>
           </motion.div>
@@ -127,7 +148,7 @@ export default function Journey() {
         </div>
 
         {/* Copy overlay */}
-        <div className="pointer-events-none absolute inset-x-0 top-20 flex flex-col items-center px-6 text-center">
+        <div className="pointer-events-none absolute inset-x-0 top-16 flex flex-col items-center px-6 text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -147,6 +168,17 @@ export default function Journey() {
             Watch the world evolve as you scroll — quiet hills to neon skylines — mirroring an entry into tech and the craft that follows.
           </motion.p>
         </div>
+
+        {/* Chapter captions that fade in/out with progress */}
+        <motion.div style={{ opacity: chap1 }} className="pointer-events-none absolute left-6 top-24 hidden rounded-md border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 backdrop-blur sm:block">
+          Chapter 1 · First curiosity in the hills
+        </motion.div>
+        <motion.div style={{ opacity: chap2 }} className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 rounded-md border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 backdrop-blur sm:block">
+          Chapter 2 · Building projects, finding momentum
+        </motion.div>
+        <motion.div style={{ opacity: chap3 }} className="pointer-events-none absolute right-6 bottom-24 hidden rounded-md border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 backdrop-blur sm:block">
+          Chapter 3 · Shipping full‑stack & Web3 in the city lights
+        </motion.div>
 
         {/* Bottom gradient to next section */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#0b0f17] to-transparent" />
