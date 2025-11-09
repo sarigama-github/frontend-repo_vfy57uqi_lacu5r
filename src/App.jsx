@@ -1,28 +1,33 @@
-import React, { useEffect } from 'react';
+import './index.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Journey from './components/Journey';
-import Profile from './components/Profile';
 import Projects from './components/Projects';
 import Contact from './components/Contact';
 
-export default function App() {
-  useEffect(() => {
-    document.documentElement.classList.add('scroll-smooth');
-    return () => document.documentElement.classList.remove('scroll-smooth');
-  }, []);
-
+function Footer() {
   return (
-    <div className="min-h-screen bg-[#0b0f17] font-sans text-white">
+    <footer className="bg-[#080a16] py-10 text-center text-sm text-white/60">
+      <div className="mx-auto max-w-7xl px-6">
+        <p>
+          © {new Date().getFullYear()} DevVibes — Built with React, Tailwind, Framer Motion & Spline.
+        </p>
+      </div>
+    </footer>
+  );
+}
+
+export default function App() {
+  return (
+    <div className="scroll-smooth min-h-screen bg-[#0a0c18]">
       <Navbar />
-      <Hero />
-      <Journey />
-      <Profile />
-      <Projects />
-      <Contact />
-      <footer className="border-t border-white/10 bg-[#0b0f17]/80 py-8 text-center text-sm text-white/60">
-        © {new Date().getFullYear()} Swaparup Mukherjee • Built with love, caffeine, and neon gradients.
-      </footer>
+      <main>
+        <Hero />
+        <Journey />
+        <Projects />
+        <Contact />
+      </main>
+      <Footer />
     </div>
   );
 }
